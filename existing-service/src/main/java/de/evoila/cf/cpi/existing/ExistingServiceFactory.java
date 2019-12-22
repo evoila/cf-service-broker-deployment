@@ -1,6 +1,6 @@
 package de.evoila.cf.cpi.existing;
 
-import de.evoila.cf.broker.bean.ExistingEndpointBean;
+import de.evoila.cf.broker.bean.impl.ExistingEndpoint;
 import de.evoila.cf.broker.exception.PlatformException;
 import de.evoila.cf.broker.model.catalog.plan.Plan;
 import de.evoila.cf.broker.model.Platform;
@@ -27,10 +27,10 @@ public abstract class ExistingServiceFactory implements PlatformService {
 
 	private ServicePortAvailabilityVerifier portAvailabilityVerifier;
 
-    private ExistingEndpointBean existingEndpointBean;
+    private ExistingEndpoint existingEndpointBean;
 
     public ExistingServiceFactory(PlatformRepository platformRepository, ServicePortAvailabilityVerifier portAvailabilityVerifier,
-								  ExistingEndpointBean existingEndpointBean) {
+								  ExistingEndpoint existingEndpointBean) {
     	this.platformRepository = platformRepository;
     	this.portAvailabilityVerifier = portAvailabilityVerifier;
     	this.existingEndpointBean = existingEndpointBean;
