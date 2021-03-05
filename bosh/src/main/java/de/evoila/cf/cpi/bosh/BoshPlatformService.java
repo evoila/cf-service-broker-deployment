@@ -61,6 +61,8 @@ public abstract class BoshPlatformService implements PlatformService {
 
     private static final String DONE = "done";
 
+    private static final String CREDENTIAL_AGENT = "credential-agent";
+
     protected final BoshClient boshClient;
 
     private final PlatformRepository platformRepository;
@@ -148,6 +150,27 @@ public abstract class BoshPlatformService implements PlatformService {
     protected void runDeleteErrands(ServiceInstance instance, Deployment deployment,
                                     Observable<List<ErrandSummary>> errands) {
     }
+
+    private boolean hasCredentialAgent(String deploymentName) {
+        List<ErrandSummary> result = boshClient.client().errands().list(deploymentName).toBlocking().first();
+        return result.stream().anyMatch(errandSummary -> errandSummary.getName().equals(CREDENTIAL_AGENT));
+    }
+
+    public void startCredentialAgent(ServiceInstance serviceInstance) throws PlatformException {
+
+        String deploymentName = DeploymentManager.deploymentName(serviceInstance);
+        if (!hasCredentialAgent(deploymentName)) {
+            throw new PlatformException("The service instance does not contain credential agent");
+        }
+        Task task = boshClient.client()
+                .errands()
+                .runErrand(deploymentName, CREDENTIAL_AGENT)
+                .toBlocking().first();
+        if (!portAvailabilityVerifier.verifyServiceAvailability(serviceInstance, 8050, true)) {
+            throw new PlatformException("The credential agent is not available");
+        }
+    }
+
 
     protected void waitForTaskCompletion(Task task, Instant endTime) throws PlatformException {
         log.debug("Bosh Deployment started waiting for task to complete {}", task);
@@ -443,7 +466,7 @@ public abstract class BoshPlatformService implements PlatformService {
 
         return deploymentManager.readManifestFromString(manifest);
     }
-  
+
     private void cleanUp(ServiceInstance serviceInstance, Plan plan) {
         log.error("Cleaning up failed Service Instance: " + serviceInstance.getId());
         try {
