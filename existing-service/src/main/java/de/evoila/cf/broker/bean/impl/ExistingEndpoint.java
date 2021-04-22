@@ -1,10 +1,8 @@
 package de.evoila.cf.broker.bean.impl;
 
-import de.evoila.cf.broker.bean.ExistingEndpointBean;
 import de.evoila.cf.broker.model.catalog.ServerAddress;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,32 +10,32 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author Yannic Remmet, Johannes Hiemer.
+ * @author Marco Di Martino.
  */
-@Service
-@Profile("!pcf")
-@ConfigurationProperties(prefix = "existing.endpoint")
-public class ExistingEndpointBeanImpl implements ExistingEndpointBean {
+@Configuration
+@ConfigurationProperties
+public class ExistingEndpoint  {
+
+    private String serverName;
 
     private String name;
 
-	private List<ServerAddress> hosts = new ArrayList<>();
+    private List<ServerAddress> hosts = new ArrayList<>();
 
-	private int port;
+    private int port;
 
-	private String username;
+    private String username;
 
-	private String password;
+    private String password;
 
-	private String database;
+    private String database;
 
     private String deployment;
 
-    private BackupCredentials backupCredentials;
-
     private Map<String, String> parameters = new HashMap();
 
-    @Override
+    private BackupCredentials backupCredentials;
+
     public String getName() {
         return name;
     }
@@ -46,7 +44,6 @@ public class ExistingEndpointBeanImpl implements ExistingEndpointBean {
         this.name = name;
     }
 
-    @Override
     public List<ServerAddress> getHosts() {
         return hosts;
     }
@@ -55,7 +52,6 @@ public class ExistingEndpointBeanImpl implements ExistingEndpointBean {
         this.hosts = hosts;
     }
 
-    @Override
     public int getPort() {
         return port;
     }
@@ -64,7 +60,6 @@ public class ExistingEndpointBeanImpl implements ExistingEndpointBean {
         this.port = port;
     }
 
-    @Override
     public String getUsername() {
         return username;
     }
@@ -73,7 +68,6 @@ public class ExistingEndpointBeanImpl implements ExistingEndpointBean {
         this.username = username;
     }
 
-    @Override
     public String getPassword() {
         return password;
     }
@@ -82,7 +76,6 @@ public class ExistingEndpointBeanImpl implements ExistingEndpointBean {
         this.password = password;
     }
 
-    @Override
     public String getDatabase() {
         return database;
     }
@@ -91,7 +84,6 @@ public class ExistingEndpointBeanImpl implements ExistingEndpointBean {
         this.database = database;
     }
 
-    @Override
     public String getDeployment() {
         return deployment;
     }
@@ -100,7 +92,13 @@ public class ExistingEndpointBeanImpl implements ExistingEndpointBean {
         this.deployment = deployment;
     }
 
-    @Override
+    public String getServerName() {
+        return serverName;
+    }
+
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
+    }
     public BackupCredentials getBackupCredentials() {
         return backupCredentials;
     }
@@ -112,9 +110,4 @@ public class ExistingEndpointBeanImpl implements ExistingEndpointBean {
     public Map<String, String> getParameters() {
         return parameters;
     }
-
-    public void setParameters(Map<String, String> parameters) {
-        this.parameters = parameters;
-    }
 }
-

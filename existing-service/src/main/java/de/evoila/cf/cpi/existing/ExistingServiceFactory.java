@@ -1,23 +1,25 @@
 package de.evoila.cf.cpi.existing;
 
-import de.evoila.cf.broker.bean.ExistingEndpointBean;
+import de.evoila.cf.broker.bean.ExistingEndpointsBean;
+import de.evoila.cf.broker.bean.impl.ExistingEndpoint;
 import de.evoila.cf.broker.exception.PlatformException;
-import de.evoila.cf.broker.model.catalog.plan.Plan;
 import de.evoila.cf.broker.model.Platform;
 import de.evoila.cf.broker.model.ServiceInstance;
+import de.evoila.cf.broker.model.catalog.plan.Plan;
 import de.evoila.cf.broker.repository.PlatformRepository;
 import de.evoila.cf.broker.service.PlatformService;
 import de.evoila.cf.broker.service.availability.ServicePortAvailabilityVerifier;
+import de.evoila.cf.security.credentials.credhub.CredhubClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
- *
  * @author Christian Brinker, evoila.
- *
  */
 public abstract class ExistingServiceFactory implements PlatformService {
 
@@ -27,13 +29,16 @@ public abstract class ExistingServiceFactory implements PlatformService {
 
 	private ServicePortAvailabilityVerifier portAvailabilityVerifier;
 
-    private ExistingEndpointBean existingEndpointBean;
+    private ExistingEndpointsBean existingEndpoints;
+
+    private CredhubClient credhubClient;
 
     public ExistingServiceFactory(PlatformRepository platformRepository, ServicePortAvailabilityVerifier portAvailabilityVerifier,
-								  ExistingEndpointBean existingEndpointBean) {
+								  ExistingEndpointsBean existingEndpoints, CredhubClient credhubClient) {
     	this.platformRepository = platformRepository;
     	this.portAvailabilityVerifier = portAvailabilityVerifier;
-    	this.existingEndpointBean = existingEndpointBean;
+    	this.existingEndpoints = existingEndpoints;
+    	this.credhubClient = credhubClient;
 	}
 
 	@Override
@@ -76,7 +81,15 @@ public abstract class ExistingServiceFactory implements PlatformService {
 
     @Override
     public ServiceInstance postCreateInstance(ServiceInstance serviceInstance, Plan plan) throws PlatformException {
-        serviceInstance.setHosts(existingEndpointBean.getHosts());
+		List<ExistingEndpoint> hosts = existingEndpoints.getEndpoints().stream().filter(e -> {
+			if (e.getServerName().equals(plan.getMetadata().getEndpointName()))
+				return true;
+			else
+				return false;
+			}).collect(Collectors.toList());
+
+    	hosts.stream().forEach(endpoint -> serviceInstance.setHosts(endpoint.getHosts()));
+
 
         boolean available;
         try {
